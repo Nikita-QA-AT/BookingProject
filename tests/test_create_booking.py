@@ -1,7 +1,8 @@
 import allure
+import pytest
 from pydantic import ValidationError
+from requests import HTTPError
 from core.models.booking import BookingResponse
-from core.clients.endpoints import Endpoints
 
 
 @allure.feature('Test creating booking')
@@ -60,10 +61,8 @@ def test_create_booking_with_random_data(api_client, generate_random_booking_dat
 @allure.feature('Test creating booking')
 @allure.story('Negative: creating booking with empty body')
 def test_create_booking_with_empty_body(api_client):
-    response = api_client.session.post(
-        f"{api_client.base_url}{Endpoints.BOOKING_ENDPOINT.value}", json={}
-    )
-    assert response.status_code == 500
+    with pytest.raises(HTTPError):
+        api_client.create_booking({})
 
 
 @allure.feature('Test creating booking')
@@ -79,7 +78,6 @@ def test_create_booking_without_firstname(api_client):
         },
         "additionalneeds": "Breakfast"
     }
-    response = api_client.session.post(
-        f"{api_client.base_url}{Endpoints.BOOKING_ENDPOINT.value}", json=booking_data
-    )
-    assert response.status_code == 500
+
+    with pytest.raises(HTTPError):
+        api_client.create_booking(booking_data)
